@@ -4,31 +4,30 @@ package parser;
 
 import java.io.Reader;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-class PlSql/*@bgen(jjtree)*/implements PlSqlTreeConstants, PlSqlConstants {/*@bgen(jjtree)*/
+import javax.xml.soap.Node;
+
+public class PlSql_Parser implements PlSqlTreeConstants, PlSqlConstants {/*@bgen(jjtree)*/
   protected JJTPlSqlState jjtree = new JJTPlSqlState();
+  
+  private static String code = "";
+  private static String className = "";
+  
     /** Parse PL/SQL from files.  Each arg is expected to be the name of a file,
         or "-" to indicate System.in.
      */
     public static void main( String args[] ) throws Throwable {
-        if (args.length < 1) {
-            args = new String[] {"-"};
-        }
-        for (int a = 0; a < args.length; ++a) {
-            final String input = args[a];
-            final PlSql parser = new PlSql("-".equals(input) ? System.in : new FileInputStream(input));
-            try {
-                //parser.CompilationUnit();
-                SimpleNode n = parser.CompilationUnit();
-                n.dump("");
-            } catch(Throwable t) {
-                System.err.println(input + ":1: not parsed");
-                t.printStackTrace();
-            }
-            System.out.println(parser.tables.size() + " tables in " + input);
-        }
+        className = args[0];
+        final String input = args[1];
+        final PlSql_Parser parser = new PlSql_Parser("-".equals(input) ? System.in : new FileInputStream(input));
+        SimpleNode node = parser.CompilationUnit();
+        node.dump("");
+        System.out.println(Node.ENTITY_NODE);
+        System.out.println(parser.tables.size() + " tables in " + input);
     }
 
     public Set<String> functions = new HashSet<String>();
@@ -708,12 +707,15 @@ if (jjtc000) {
     }
   }
 
-  final public void VariableDeclaration() throws ParseException {/*@bgen(jjtree) VariableDeclaration */
+  final public String[] VariableDeclaration() throws ParseException {/*@bgen(jjtree) VariableDeclaration */
   SimpleNode jjtn000 = new SimpleNode(JJTVARIABLEDECLARATION);
   boolean jjtc000 = true;
+  String[] output = new String[3];
+  output[0] = token.image;
   jjtree.openNodeScope(jjtn000);
     try {
-      TypeDefinition();
+    	TypeDefinition();
+    	output[1] = token.image;
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case K_NOT:{
         jj_consume_token(K_NOT);
@@ -742,6 +744,7 @@ if (jjtc000) {
           throw new ParseException();
         }
         PlSqlExpression();
+        output[2] = token.image;
         break;
         }
       default:
@@ -767,6 +770,7 @@ if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
       }
     }
+	return output;
   }
 
   final public void ConstantDeclaration() throws ParseException {/*@bgen(jjtree) ConstantDeclaration */
@@ -1544,7 +1548,7 @@ if (jjtc000) {
     }
   }
 
-  final public void ProcedureReference() throws ParseException {/*@bgen(jjtree) ProcedureReference */
+  final public String ProcedureReference() throws ParseException {/*@bgen(jjtree) ProcedureReference */
     SimpleNode jjtn000 = new SimpleNode(JJTPROCEDUREREFERENCE);
     boolean jjtc000 = true;
     jjtree.openNodeScope(jjtn000);String name;
@@ -1572,14 +1576,17 @@ if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
       }
     }
+	return name;
   }
 
-  final public void AssignmentStatement() throws ParseException {/*@bgen(jjtree) AssignmentStatement */
+  final public String AssignmentStatement() throws ParseException {/*@bgen(jjtree) AssignmentStatement */
   SimpleNode jjtn000 = new SimpleNode(JJTASSIGNMENTSTATEMENT);
   boolean jjtc000 = true;
+  String output = "";
   jjtree.openNodeScope(jjtn000);
     try {
       DataItem();
+      output = token.image;
       jj_consume_token(157);
       PlSqlExpression();
       jj_consume_token(153);
@@ -1602,6 +1609,7 @@ if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
       }
     }
+	return output;
   }
 
   final public void ExitStatement() throws ParseException {/*@bgen(jjtree) ExitStatement */
@@ -1927,13 +1935,15 @@ if (jjtc000) {
     }
   }
 
-  final public void NumericForLoop() throws ParseException {/*@bgen(jjtree) NumericForLoop */
+  final public String[] NumericForLoop() throws ParseException {/*@bgen(jjtree) NumericForLoop */
   SimpleNode jjtn000 = new SimpleNode(JJTNUMERICFORLOOP);
+  String[] output = new String[3];
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
       jj_consume_token(K_FOR);
       jj_consume_token(S_IDENTIFIER);
+      output[0] = token.image;
       jj_consume_token(K_IN);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case K_REVERSE:{
@@ -1945,8 +1955,10 @@ if (jjtc000) {
         ;
       }
       PlSqlSimpleExpression();
+      output[1] = token.image;
       jj_consume_token(162);
       PlSqlSimpleExpression();
+      output[2] = token.image;
       NormalLoop();
     } catch (Throwable jjte000) {
 if (jjtc000) {
@@ -1967,6 +1979,7 @@ if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
       }
     }
+	return output;
   }
 
   final public void CursorForLoop() throws ParseException {/*@bgen(jjtree) CursorForLoop */
@@ -3262,8 +3275,7 @@ if (jjtc000) {
   }
 
 // PLSQL Expression and it's children
-  final public 
-void PlSqlExpression() throws ParseException {/*@bgen(jjtree) PlSqlExpression */
+  final public String[] PlSqlExpression() throws ParseException {/*@bgen(jjtree) PlSqlExpression */
   SimpleNode jjtn000 = new SimpleNode(JJTPLSQLEXPRESSION);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
@@ -3302,6 +3314,7 @@ if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
       }
     }
+	return null;
   }
 
   final public void PlSqlAndExpression() throws ParseException {/*@bgen(jjtree) PlSqlAndExpression */
@@ -3645,9 +3658,10 @@ if (jjtc000) {
     }
   }
 
-  final public void PlSqlSimpleExpression() throws ParseException {/*@bgen(jjtree) PlSqlSimpleExpression */
+  final public String PlSqlSimpleExpression() throws ParseException {/*@bgen(jjtree) PlSqlSimpleExpression */
   SimpleNode jjtn000 = new SimpleNode(JJTPLSQLSIMPLEEXPRESSION);
   boolean jjtc000 = true;
+  String operation = "";
   jjtree.openNodeScope(jjtn000);
     try {
       PlSqlMultiplicativeExpression();
@@ -3682,6 +3696,7 @@ if (jjtc000) {
           jj_consume_token(-1);
           throw new ParseException();
         }
+        operation = token.image;
         PlSqlMultiplicativeExpression();
       }
     } catch (Throwable jjte000) {
@@ -3703,9 +3718,10 @@ if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
       }
     }
+	return operation;
   }
 
-  final public void PlSqlMultiplicativeExpression() throws ParseException {/*@bgen(jjtree) PlSqlMultiplicativeExpression */
+  final public String PlSqlMultiplicativeExpression() throws ParseException {/*@bgen(jjtree) PlSqlMultiplicativeExpression */
   SimpleNode jjtn000 = new SimpleNode(JJTPLSQLMULTIPLICATIVEEXPRESSION);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
@@ -3763,6 +3779,7 @@ if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
       }
     }
+	return token.image;
   }
 
   final public void PlSqlExponentExpression() throws ParseException {/*@bgen(jjtree) PlSqlExponentExpression */
@@ -4387,12 +4404,13 @@ if (jjtc000) {
     }
   }
 
-  final public void Arguments() throws ParseException {/*@bgen(jjtree) Arguments */
+  final public String Arguments() throws ParseException {/*@bgen(jjtree) Arguments */
+	  String output = "";
   SimpleNode jjtn000 = new SimpleNode(JJTARGUMENTS);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      Argument();
+    	output += Argument();
       label_26:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -4405,7 +4423,7 @@ if (jjtc000) {
           break label_26;
         }
         jj_consume_token(156);
-        Argument();
+        output += ", " + Argument();
       }
     } catch (Throwable jjte000) {
 if (jjtc000) {
@@ -4426,10 +4444,12 @@ if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
       }
     }
+    return output;
   }
 
-  final public void Argument() throws ParseException {/*@bgen(jjtree) Argument */
+  final public String Argument() throws ParseException {/*@bgen(jjtree) Argument */
   SimpleNode jjtn000 = new SimpleNode(JJTARGUMENT);
+  String output = "";
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
@@ -4459,6 +4479,8 @@ if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
       }
     }
+    output = token.image;
+	return output;
   }
 
 /* --------------- General Productions ends here --------------- */
@@ -7266,6 +7288,7 @@ name.append("@").append(s);
         jj_la1[240] = jj_gen;
         ;
       }
+
 jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
 {if ("" != null) return lastObjectReference = name.toString();}
@@ -10638,11 +10661,11 @@ if (jjtc000) {
   private int jj_gc = 0;
 
   /** Constructor with InputStream. */
-  public PlSql(java.io.InputStream stream) {
+  public PlSql_Parser(java.io.InputStream stream) {
      this(stream, null);
   }
   /** Constructor with InputStream and supplied encoding */
-  public PlSql(java.io.InputStream stream, String encoding) {
+  public PlSql_Parser(java.io.InputStream stream, String encoding) {
     try { jj_input_stream = new SimpleCharStream(stream, encoding, 1, 1); } catch(java.io.UnsupportedEncodingException e) { throw new RuntimeException(e); }
     token_source = new PlSqlTokenManager(jj_input_stream);
     token = new Token();
@@ -10669,7 +10692,7 @@ if (jjtc000) {
   }
 
   /** Constructor. */
-  public PlSql(java.io.Reader stream) {
+  public PlSql_Parser(java.io.Reader stream) {
     jj_input_stream = new SimpleCharStream(stream, 1, 1);
     token_source = new PlSqlTokenManager(jj_input_stream);
     token = new Token();
@@ -10692,7 +10715,7 @@ if (jjtc000) {
   }
 
   /** Constructor with generated Token Manager. */
-  public PlSql(PlSqlTokenManager tm) {
+  public PlSql_Parser(PlSqlTokenManager tm) {
     token_source = tm;
     token = new Token();
     jj_ntk = -1;
@@ -10968,5 +10991,21 @@ if (jjtc000) {
     int arg;
     JJCalls next;
   }
+  
+	public static String getCode() {
+		return code;
+	}
+	
+	public static void setCode(String code) {
+		PlSql_Parser.code = code;
+	}
 
+	public static String getClassName() {
+		return className;
+	}
+
+	public static void setClassName(String className) {
+		PlSql_Parser.className = className;
+	}
+	
 }

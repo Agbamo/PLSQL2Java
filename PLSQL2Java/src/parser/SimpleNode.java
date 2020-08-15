@@ -9,13 +9,13 @@ class SimpleNode implements Node {
   protected Node[] children;
   protected int id;
   protected Object value;
-  protected PlSql parser;
+  protected PlSql_Parser parser;
 
   public SimpleNode(int i) {
     id = i;
   }
 
-  public SimpleNode(PlSql p, int i) {
+  public SimpleNode(PlSql_Parser p, int i) {
     this(i);
     parser = p;
   }
